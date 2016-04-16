@@ -54,12 +54,6 @@
     }
     
     function handleComputerMove(repsonseData) {
-        // {
-        //     "board": "XO-X--X--",
-        //     "gameOver": true,
-        //     "winningLine": [0, 3, 6],
-        //     "winningPlayer": 1
-        // }
         stringToBoard(responseData.board);
         if (responseData.gameOver) {
             setMessage(responseData.winningPlayer === 1 ? PLAYER1_WON_MESSAGE : PLAYER2_WON_MESSAGE);
@@ -97,6 +91,7 @@
     
     function resetBoard() {
         stringToBoard("---------");
+        $("#board td").removeClass("highlight");
     }
     
     function setCell(id, ch) {
@@ -121,8 +116,8 @@
             8: "cell22"
         };
         for (var i = 0; i < cellIndices.length; i++) {
-            var id = "#" + cellIndicesToIds[cellIndices[i]];
-            $(id).addClass("highlight");
+            var id = cellIndicesToIds[cellIndices[i]];
+            $("#" + id).addClass("highlight");
         }
     }
     
