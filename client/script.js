@@ -2,8 +2,8 @@
     
     "use strict";
     
-    var PLAYER1_TURN_MESSAGE = "Your turn (X). Click an empty square to make your move.";
-    var PLAYER2_TURN_MESSAGE = "The computer (O) is thinking...";
+    var PLAYER1_TURN_MESSAGE = "Your turn. Click an empty square to make your move.";
+    var PLAYER2_TURN_MESSAGE = "The computer is thinking...";
     var PLAYER1_WON_MESSAGE = "You won!";
     var PLAYER2_WON_MESSAGE = "The computer won!";
     var DRAW_MESSAGE = "It's a draw!";
@@ -11,14 +11,21 @@
     var CROSS = "X";
     var NOUGHT = "O";
     var EMPTY = "-";
-    var player1Piece = CROSS;
-    var player2Piece = NOUGHT;
+    var player1Piece;
+    var player2Piece;
     var gameOver = false;
     var computerMoveInProgress = false;
     
     $(document).ready(function() {
         $("#resetBtn").click(onReset);
         $("#board td").click(onCellClick);
+        $("#crossesRadio").click(function() {
+            choosePiece(CROSS);
+        });
+        $("#noughtsRadio").click(function() {
+            choosePiece(NOUGHT);
+        });
+        $("#crossesRadio").trigger("click");
         resetBoard();
         setMessage(PLAYER1_TURN_MESSAGE);
         hideSpinner();
@@ -28,9 +35,11 @@
         resetBoard();
         gameOver = false;
         computerMoveInProgress = false;
+        showRadioButtons();
     }
 
     function onCellClick(e) {
+        hideRadioButtons();
         if (gameOver) {
             console.log("Game over!");
             return;
@@ -47,6 +56,11 @@
         }
         setCell(id, player1Piece);
         computerMove();
+    }
+    
+    function choosePiece(piece) {
+        player1Piece = piece;
+        player2Piece = (piece === CROSS) ? NOUGHT : CROSS;
     }
     
     function computerMove() {
@@ -167,6 +181,10 @@
         }
     }
     
+    function setMessage(message) {
+        $("#messageArea").html(message);
+    }
+    
     function showSpinner() {
         $("#spinner").show();
     }
@@ -175,7 +193,11 @@
         $("#spinner").hide();
     }
     
-    function setMessage(message) {
-        $("#messageArea").html(message);
+    function showRadioButtons() {
+        $("#radioButtons").show();
+    }
+    
+    function hideRadioButtons() {
+        $("#radioButtons").hide();
     }
 }());
