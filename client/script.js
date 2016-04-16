@@ -8,6 +8,13 @@
     var PLAYER2_WON_MESSAGE = "The computer won!";
     var DRAW_MESSAGE = "It's a draw!";
     var UNKNOWN_WINNER_MESSAGE = "I r confuse about who won!?";
+    var CROSS = "X";
+    var NOUGHT = "O";
+    var EMPTY = "-";
+    var player1Piece = CROSS;
+    var player2Piece = NOUGHT;
+    var gameOver = false;
+    var computerMoveInProgress = false;
     
     $(document).ready(function() {
         $("#resetBtn").click(onReset);
@@ -19,20 +26,32 @@
     
     function onReset() {
         resetBoard();
+        gameOver = false;
+        computerMoveInProgress = false;
     }
 
     function onCellClick(e) {
+        if (gameOver) {
+            console.log("Game over!");
+            return;
+        }
+        if (computerMoveInProgress) {
+            console.log("Computer move is in progress!");
+            return;
+        }
         var id = e.target.id;
         var ch = getCell(id);
-        if (ch !== "-") {
+        if (ch !== EMPTY) {
             console.log("Cell is already occupied!");
             return;
         }
-        setCell(id, "X");
+        setCell(id, player1Piece);
         computerMove();
     }
     
     function computerMove() {
+        
+        computerMoveInProgress = true;
         
         setMessage(PLAYER2_TURN_MESSAGE);
         showSpinner();
@@ -54,6 +73,7 @@
             })
             .always(function() {
                 hideSpinner();
+                computerMoveInProgress = false;
             });        
     }
     
@@ -76,6 +96,7 @@
                 setMessage(UNKNOWN_WINNER_MESSAGE);
                     break;    
             }
+            gameOver = true;
         }
         else {
             setMessage(PLAYER1_TURN_MESSAGE);
@@ -108,17 +129,22 @@
     }
     
     function resetBoard() {
-        updateBoardFromString("---------");
+        var emptyBoard = [
+            EMPTY, EMPTY, EMPTY,
+            EMPTY, EMPTY, EMPTY,
+            EMPTY, EMPTY, EMPTY
+        ].join("");
+        updateBoardFromString(emptyBoard);
         $("#board td").removeClass("highlight");
     }
     
     function setCell(id, ch) {
-        $("#" + id).html(ch === "X" || ch === "O" ? ch : " ");
+        $("#" + id).html(ch === CROSS || ch === NOUGHT ? ch : "");
     }
     
     function getCell(id) {
         var ch = $("#" + id).html();
-        return ch === "X" || ch === "O" ? ch : "-";
+        return ch === CROSS || ch === NOUGHT ? ch : EMPTY;
     }
     
     function highlightWinningLine(cellIndices) {

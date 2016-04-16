@@ -17,20 +17,27 @@ app.listen(port, function () {
     console.log("Listening on port %d", port);
 });
 
+var CROSS = "X";
+var NOUGHT = "O";
+var THREE_CROSSES = "XXX";
+var THREE_NOUGHTS = "OOO";
+var player1Piece = CROSS;
+var playee2Piece = NOUGHT;
+
 function handleComputerMove(req, res, _) {
     
     var board = req.body.board;
     
-    var win = checkForWinOrDraw(board);
-    if (win) {
-        return sendJsonResponse(res, 200, win);
+    var winOrDraw = checkForWinOrDraw(board);
+    if (winOrDraw) {
+        return sendJsonResponse(res, 200, winOrDraw);
     }
 
     board = makeRandomMove(board);
     
-    win = checkForWinOrDraw(board);
-    if (win) {
-        return sendJsonResponse(res, 200, win);
+    winOrDraw = checkForWinOrDraw(board);
+    if (winOrDraw) {
+        return sendJsonResponse(res, 200, winOrDraw);
     }
     else {
         var responseData = {
@@ -45,13 +52,13 @@ function makeRandomMove(board) {
     var unoccupiedIndices = [];
     for (var i = 0; i < board.length; i++) {
         var ch = board[i];
-        if (ch !== "X" && ch !== "O") {
+        if (ch !== CROSS && ch !== NOUGHT) {
             unoccupiedIndices.push(i);
         }
     }
     var randomUnoccupiedIndex = getRandomIntInclusive(0, unoccupiedIndices.length - 1);
     var index = unoccupiedIndices[randomUnoccupiedIndex];
-    board = setCharAt(board, "O", index);
+    board = setCharAt(board, NOUGHT, index);
     return board;
 }
 
@@ -98,14 +105,23 @@ function checkForWinOrDraw(board) {
 }
 
 function checkForWinningLine(board, line) {
+    
     var chs = "";
+    
     for (var i = 0; i < line.length; i++) {
         var boardIndex = line[i];
         chs += board[boardIndex];
     }
-    if (chs === "XXX") return 1;
-    if (chs === "OOO") return 2;
+    
+    if (chs === THREE_CROSSES || chs == THREE_NOUGHTS) {
+        return playerNumberFromPiece(chs[0]);
+    }
+    
     return null;
+}
+
+function playerNumberFromPiece(ch) {
+    return ch === player1Piece ? 1 : 2;
 }
 
 function checkForDraw(board) {
@@ -114,7 +130,7 @@ function checkForDraw(board) {
     
     for (var i = 0; i < board.length; i++) {
         var ch = board[i];
-        if (ch === "X" || ch === "O") {
+        if (ch === CROSS || ch === NOUGHT) {
             occupiedCellCount++;
         }
     }
