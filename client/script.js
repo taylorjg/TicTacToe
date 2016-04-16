@@ -57,7 +57,9 @@
         showSpinner();
         
         var requestData = {
-            board: saveBoardToString()
+            board: saveBoardToString(),
+            player1Piece: player1Piece,
+            player2Piece: player2Piece
         };
         
         $.post({

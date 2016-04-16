@@ -21,21 +21,21 @@ var CROSS = "X";
 var NOUGHT = "O";
 var THREE_CROSSES = "XXX";
 var THREE_NOUGHTS = "OOO";
-var player1Piece = CROSS;
-var playee2Piece = NOUGHT;
 
 function handleComputerMove(req, res, _) {
     
     var board = req.body.board;
+    var player1Piece = req.body.player1Piece;
+    var player2Piece = req.body.player2Piece;
     
-    var winOrDraw = checkForWinOrDraw(board);
+    var winOrDraw = checkForWinOrDraw(board, player1Piece, player2Piece);
     if (winOrDraw) {
         return sendJsonResponse(res, 200, winOrDraw);
     }
 
-    board = makeRandomMove(board);
+    board = makeRandomMove(board, player2Piece);
     
-    winOrDraw = checkForWinOrDraw(board);
+    winOrDraw = checkForWinOrDraw(board, player1Piece, player2Piece);
     if (winOrDraw) {
         return sendJsonResponse(res, 200, winOrDraw);
     }
@@ -48,7 +48,7 @@ function handleComputerMove(req, res, _) {
     }
 }
 
-function makeRandomMove(board) {
+function makeRandomMove(board, player2Piece) {
     var unoccupiedIndices = [];
     for (var i = 0; i < board.length; i++) {
         var ch = board[i];
@@ -58,7 +58,7 @@ function makeRandomMove(board) {
     }
     var randomUnoccupiedIndex = getRandomIntInclusive(0, unoccupiedIndices.length - 1);
     var index = unoccupiedIndices[randomUnoccupiedIndex];
-    board = setCharAt(board, NOUGHT, index);
+    board = setCharAt(board, player2Piece, index);
     return board;
 }
 
@@ -75,7 +75,7 @@ function getRandomIntInclusive(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function checkForWinOrDraw(board) {
+function checkForWinOrDraw(board, player1Piece, player2Piece) {
     
     var lines = [
         [0,1,2],
@@ -90,7 +90,7 @@ function checkForWinOrDraw(board) {
     
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        var winningPlayer = checkForWinningLine(board, line);
+        var winningPlayer = checkForWinningLine(board, player1Piece, player2Piece, line);
         if (winningPlayer) {
             return {
                 board: board,
@@ -104,7 +104,7 @@ function checkForWinOrDraw(board) {
     return checkForDraw(board);
 }
 
-function checkForWinningLine(board, line) {
+function checkForWinningLine(board, player1Piece, player2Piece, line) {
     
     var chs = "";
     
@@ -114,14 +114,16 @@ function checkForWinningLine(board, line) {
     }
     
     if (chs === THREE_CROSSES || chs == THREE_NOUGHTS) {
-        return playerNumberFromPiece(chs[0]);
+        return playerNumberFromPiece(chs[0], player1Piece, player2Piece);
     }
     
     return null;
 }
 
-function playerNumberFromPiece(ch) {
-    return ch === player1Piece ? 1 : 2;
+function playerNumberFromPiece(ch, player1Piece, player2Piece) {
+    if (ch === player1Piece) return 1;
+    if (ch === player2Piece) return 2;
+    return null;
 }
 
 function checkForDraw(board) {
