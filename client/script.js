@@ -13,8 +13,6 @@
         resetBoard();
         setMessage(PLAYER1_TURN_MESSAGE);
         hideSpinner();
-        stringToBoard("X--X--X--");
-        highlightWinningLine([0, 3, 6]);
     });
     
     function onReset() {
@@ -38,10 +36,14 @@
         showSpinner();
         
         var requestData = {
-            board: boardToString()
+            board: saveBoardToString()
         };
         
-        $.post("/computerMove", requestData)
+        $.post({
+            url: "/api/computerMove",
+            data: JSON.stringify(requestData),
+            contentType: "application/json"
+        })
             .done(function(responseData) {
                 handleComputerMove(responseData);
             })
@@ -53,8 +55,8 @@
             });        
     }
     
-    function handleComputerMove(repsonseData) {
-        stringToBoard(responseData.board);
+    function handleComputerMove(responseData) {
+        updateBoardFromString(responseData.board);
         if (responseData.gameOver) {
             setMessage(responseData.winningPlayer === 1 ? PLAYER1_WON_MESSAGE : PLAYER2_WON_MESSAGE);
             highlightWinningLine(responseData.winningLine);
@@ -64,7 +66,7 @@
         }
     }
     
-    function boardToString() {
+    function saveBoardToString() {
         return "" +
             getCell("cell00") +
             getCell("cell01") +
@@ -77,7 +79,7 @@
             getCell("cell22");
     }
 
-    function stringToBoard(s) {
+    function updateBoardFromString(s) {
         setCell("cell00", s[0]);
         setCell("cell01", s[1]);
         setCell("cell02", s[2]);
@@ -90,7 +92,7 @@
     }
     
     function resetBoard() {
-        stringToBoard("---------");
+        updateBoardFromString("---------");
         $("#board td").removeClass("highlight");
     }
     
