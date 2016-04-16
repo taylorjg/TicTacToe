@@ -21,14 +21,14 @@ function handleComputerMove(req, res, _) {
     
     var board = req.body.board;
     
-    var win = checkForWin(board);
+    var win = checkForWinOrDraw(board);
     if (win) {
         return sendJsonResponse(res, 200, win);
     }
 
     board = makeRandomMove(board);
     
-    win = checkForWin(board);
+    win = checkForWinOrDraw(board);
     if (win) {
         return sendJsonResponse(res, 200, win);
     }
@@ -68,7 +68,7 @@ function getRandomIntInclusive(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function checkForWin(board) {
+function checkForWinOrDraw(board) {
     
     var lines = [
         [0,1,2],
@@ -94,7 +94,7 @@ function checkForWin(board) {
         }
     }
     
-    return null;
+    return checkForDraw(board);
 }
 
 function checkForWinningLine(board, line) {
@@ -105,6 +105,28 @@ function checkForWinningLine(board, line) {
     }
     if (chs === "XXX") return 1;
     if (chs === "OOO") return 2;
+    return null;
+}
+
+function checkForDraw(board) {
+    
+    var occupiedCellCount = 0;
+    
+    for (var i = 0; i < board.length; i++) {
+        var ch = board[i];
+        if (ch === "X" || ch === "O") {
+            occupiedCellCount++;
+        }
+    }
+    
+    if (occupiedCellCount === board.length) {
+        return {
+            board: board,
+            gameOver: true,
+            winningPlayer: 3,
+        }
+    }
+    
     return null;
 }
 

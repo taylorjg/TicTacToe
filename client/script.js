@@ -6,6 +6,8 @@
     var PLAYER2_TURN_MESSAGE = "The computer (O) is thinking...";
     var PLAYER1_WON_MESSAGE = "You won!";
     var PLAYER2_WON_MESSAGE = "The computer won!";
+    var DRAW_MESSAGE = "It's a draw!";
+    var UNKNOWN_WINNER_MESSAGE = "I r confuse about who won!?";
     
     $(document).ready(function() {
         $("#resetBtn").click(onReset);
@@ -58,8 +60,22 @@
     function handleComputerMove(responseData) {
         updateBoardFromString(responseData.board);
         if (responseData.gameOver) {
-            setMessage(responseData.winningPlayer === 1 ? PLAYER1_WON_MESSAGE : PLAYER2_WON_MESSAGE);
-            highlightWinningLine(responseData.winningLine);
+            switch (responseData.winningPlayer) {
+                case 1:
+                    setMessage(PLAYER1_WON_MESSAGE);
+                    highlightWinningLine(responseData.winningLine);
+                    break;
+                case 2:
+                    setMessage(PLAYER2_WON_MESSAGE);
+                    highlightWinningLine(responseData.winningLine);
+                    break;
+                case 3:
+                    setMessage(DRAW_MESSAGE);
+                    break;
+                default:
+                setMessage(UNKNOWN_WINNER_MESSAGE);
+                    break;    
+            }
         }
         else {
             setMessage(PLAYER1_TURN_MESSAGE);
