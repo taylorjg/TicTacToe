@@ -24,42 +24,37 @@ var THREE_NOUGHTS = "OOO";
 
 function handleComputerMove(req, res, _) {
     
-    var board = req.body.board;
-    var player1Piece = req.body.player1Piece;
-    var player2Piece = req.body.player2Piece;
+    var state = req.body;
     
-    var winOrDraw = checkForWinOrDraw(board, player1Piece, player2Piece);
+    var winOrDraw = checkForWinOrDraw(state);
     if (winOrDraw) {
         return sendJsonResponse(res, 200, winOrDraw);
     }
 
-    board = makeRandomMove(board, player2Piece);
+    makeRandomMove(state);
     
-    winOrDraw = checkForWinOrDraw(board, player1Piece, player2Piece);
+    winOrDraw = checkForWinOrDraw(state);
     if (winOrDraw) {
         return sendJsonResponse(res, 200, winOrDraw);
     }
-    else {
-        var responseData = {
-            board: board,
-            gameOver: false
-        };
-        return sendJsonResponse(res, 200, responseData);   
-    }
+    
+    var responseData = {
+        board: state.board,
+        gameOver: false
+    };
+    return sendJsonResponse(res, 200, responseData);   
 }
 
-function makeRandomMove(board, player2Piece) {
+function makeRandomMove(state) {
     var unoccupiedIndices = [];
-    for (var i = 0; i < board.length; i++) {
-        var ch = board[i];
+    for (var i = 0; i < state.board.length; i++) {
+        var ch = state.board[i];
         if (ch !== CROSS && ch !== NOUGHT) {
             unoccupiedIndices.push(i);
         }
     }
-    var randomUnoccupiedIndex = getRandomIntInclusive(0, unoccupiedIndices.length - 1);
-    var index = unoccupiedIndices[randomUnoccupiedIndex];
-    board = setCharAt(board, player2Piece, index);
-    return board;
+    var r = getRandomIntInclusive(0, unoccupiedIndices.length - 1);
+    state.board = setCharAt(state.board, state.player2Piece, unoccupiedIndices[r]);
 }
 
 function setCharAt(s, ch, index) {
@@ -75,7 +70,7 @@ function getRandomIntInclusive(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function checkForWinOrDraw(board, player1Piece, player2Piece) {
+function checkForWinOrDraw(state) {
     
     var lines = [
         [0,1,2],
@@ -90,10 +85,10 @@ function checkForWinOrDraw(board, player1Piece, player2Piece) {
     
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        var winningPlayer = checkForWinningLine(board, player1Piece, player2Piece, line);
+        var winningPlayer = checkForWinningLine(state, line);
         if (winningPlayer) {
             return {
-                board: board,
+                board: state.board,
                 gameOver: true,
                 winningPlayer: winningPlayer,
                 winningLine: line
@@ -101,45 +96,45 @@ function checkForWinOrDraw(board, player1Piece, player2Piece) {
         }
     }
     
-    return checkForDraw(board);
+    return checkForDraw(state);
 }
 
-function checkForWinningLine(board, player1Piece, player2Piece, line) {
+function checkForWinningLine(state, line) {
     
     var chs = "";
     
     for (var i = 0; i < line.length; i++) {
         var boardIndex = line[i];
-        chs += board[boardIndex];
+        chs += state.board[boardIndex];
     }
     
     if (chs === THREE_CROSSES || chs == THREE_NOUGHTS) {
-        return playerNumberFromPiece(chs[0], player1Piece, player2Piece);
+        return playerNumberFromPiece(state, chs[0]);
     }
     
     return null;
 }
 
-function playerNumberFromPiece(ch, player1Piece, player2Piece) {
-    if (ch === player1Piece) return 1;
-    if (ch === player2Piece) return 2;
+function playerNumberFromPiece(state, ch) {
+    if (ch === state.player1Piece) return 1;
+    if (ch === state.player2Piece) return 2;
     return null;
 }
 
-function checkForDraw(board) {
+function checkForDraw(state) {
     
     var occupiedCellCount = 0;
     
-    for (var i = 0; i < board.length; i++) {
-        var ch = board[i];
+    for (var i = 0; i < state.board.length; i++) {
+        var ch = state.board[i];
         if (ch === CROSS || ch === NOUGHT) {
             occupiedCellCount++;
         }
     }
     
-    if (occupiedCellCount === board.length) {
+    if (occupiedCellCount === state.board.length) {
         return {
-            board: board,
+            board: state.board,
             gameOver: true,
             winningPlayer: 3,
         }
