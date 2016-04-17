@@ -66,57 +66,44 @@ function handleComputerMove(req, res, _) {
 }
 
 function tryToWin(state) {
-    for (var i = 0; i < LINES.length; i++) {
-        var line = LINES[i];
-        var indices1 = [];
-        var indices2 = [];
-        for (var j = 0; j < line.length; j++) {
-            var idx = line[j];
-            var ch = state.board[idx];
-            if (ch === state.player2Piece) {
-                indices1.push(idx);
-            }
-            else {
-                if (ch !== state.player1Piece) {
-                    indices2.push(idx);
-                }
-            }
+    return checkForLineWithTwoPiecesAndOneEmpty(state, state.player2Piece, function(newBoard, line) {
+        return {
+            board: newBoard,
+            gameOver: true,
+            winningPlayer: 2,
+            winningLine: line
         }
-        if (indices1.length === 2 && indices2.length === 1) {
-            return {
-                board: setCharAt(state.board, state.player2Piece, indices2[0]),
-                gameOver: true,
-                winningPlayer: 2,
-                winningLine: line
-            }
-        }
-    }
-
-    return null;
+    });
 }
 
 function tryToBlock(state) {
+    return checkForLineWithTwoPiecesAndOneEmpty(state, state.player1Piece, function(newBoard, line) {
+        return {
+            board: newBoard,
+            gameOver: false
+        }
+    });
+}
+
+function checkForLineWithTwoPiecesAndOneEmpty(state, piece, buildResponse) {
+    
     for (var i = 0; i < LINES.length; i++) {
         var line = LINES[i];
-        var indices1 = [];
-        var indices2 = [];
+        var cellsWithPiece = [];
+        var emptyCells = [];
         for (var j = 0; j < line.length; j++) {
-            var idx = line[j];
-            var ch = state.board[idx];
-            if (ch === state.player1Piece) {
-                indices1.push(idx);
+            var cellIndex = line[j];
+            var ch = state.board[cellIndex];
+            if (ch === piece) {
+                cellsWithPiece.push(cellIndex);
             }
-            else {
-                if (ch !== state.player2Piece) {
-                    indices2.push(idx);
-                }
+            if (ch !== state.player1Piece && ch !== state.player2Piece) {
+                emptyCells.push(cellIndex);
             }
         }
-        if (indices1.length === 2 && indices2.length === 1) {
-            return {
-                board: setCharAt(state.board, state.player2Piece, indices2[0]),
-                gameOver: false
-            }
+        if (cellsWithPiece.length === 2 && emptyCells.length === 1) {
+            var newBoard = setCharAt(state.board, state.player2Piece, emptyCells[0]);
+            return buildResponse(newBoard, line);
         }
     }
     
