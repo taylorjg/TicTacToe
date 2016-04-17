@@ -21,6 +21,16 @@ var CROSS = "X";
 var NOUGHT = "O";
 var THREE_CROSSES = "XXX";
 var THREE_NOUGHTS = "OOO";
+var LINES = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+];
 
 function handleComputerMove(req, res, _) {
     
@@ -29,6 +39,16 @@ function handleComputerMove(req, res, _) {
     var winOrDraw = checkForWinOrDraw(state);
     if (winOrDraw) {
         return sendJsonResponse(res, 200, winOrDraw);
+    }
+    
+    var winningMove = tryToWin(state);
+    if (winningMove) {
+        return sendJsonResponse(res, 200, winningMove);
+    }
+
+    var blockingMove = tryToBlock(state);
+    if (blockingMove) {
+        return sendJsonResponse(res, 200, blockingMove);
     }
 
     makeRandomMove(state);
@@ -43,6 +63,38 @@ function handleComputerMove(req, res, _) {
         gameOver: false
     };
     return sendJsonResponse(res, 200, responseData);   
+}
+
+function tryToWin(state) {
+    return null;
+}
+
+function tryToBlock(state) {
+    for (var i = 0; i < LINES.length; i++) {
+        var line = LINES[i];
+        var indices1 = [];
+        var indices2 = [];
+        for (var j = 0; j < line.length; j++) {
+            var idx = line[j];
+            var ch = state.board[idx];
+            if (ch === state.player1Piece) {
+                indices1.push(idx);
+            }
+            else {
+                if (ch !== state.player2Piece) {
+                    indices2.push(idx);
+                }
+            }
+        }
+        if (indices1.length === 2 && indices2.length === 1) {
+            return {
+                board: setCharAt(state.board, state.player2Piece, indices2[0]),
+                gameOver: false
+            }
+        }
+    }
+    
+    return null;
 }
 
 function makeRandomMove(state) {
@@ -72,19 +124,8 @@ function getRandomIntInclusive(min, max) {
 
 function checkForWinOrDraw(state) {
     
-    var lines = [
-        [0,1,2],
-        [3,4,5],
-        [6,7,8],
-        [0,3,6],
-        [1,4,7],
-        [2,5,8],
-        [0,4,8],
-        [2,4,6]
-    ];
-    
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
+    for (var i = 0; i < LINES.length; i++) {
+        var line = LINES[i];
         var winningPlayer = checkForWinningLine(state, line);
         if (winningPlayer) {
             return {
