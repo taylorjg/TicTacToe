@@ -22,3 +22,11 @@ table {
 .highlight {
     color: red;
 }
+
+#radioButtons {
+    font-size: 32pt;
+}
+
+#radioButtons input {
+    margin-top: 24px;
+}

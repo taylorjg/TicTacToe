@@ -1,7 +1,8 @@
 (function() {
     
     "use strict";
-    
+
+    var CHOOSE_PIECE_MESSAGE = "Choose noughts or crosses then click the Start button.";     
     var PLAYER1_TURN_MESSAGE = "Your turn. Click an empty square to make your move.";
     var PLAYER2_TURN_MESSAGE = "The computer is thinking...";
     var PLAYER1_WON_MESSAGE = "You won!";
@@ -13,10 +14,12 @@
     var EMPTY = "-";
     var player1Piece;
     var player2Piece;
+    var started = false;
     var gameOver = false;
     var computerMoveInProgress = false;
     
     $(document).ready(function() {
+        $("#startBtn").click(onStart);
         $("#resetBtn").click(onReset);
         $("#board td").click(onCellClick);
         $("#crossesRadio").click(function() {
@@ -26,32 +29,24 @@
             choosePiece(NOUGHT);
         });
         $("#crossesRadio").trigger("click");
-        resetBoard();
-        setMessage(PLAYER1_TURN_MESSAGE);
-        hideSpinner();
+        initialise();
     });
     
+    function onStart() {
+        start();
+    }
+
     function onReset() {
-        resetBoard();
-        gameOver = false;
-        computerMoveInProgress = false;
-        showRadioButtons();
+        start();
     }
 
     function onCellClick(e) {
-        hideRadioButtons();
-        if (gameOver) {
-            console.log("Game over!");
-            return;
-        }
-        if (computerMoveInProgress) {
-            console.log("Computer move is in progress!");
+        if (!started || gameOver || computerMoveInProgress) {
             return;
         }
         var id = e.target.id;
         var ch = getCell(id);
         if (ch !== EMPTY) {
-            console.log("Cell is already occupied!");
             return;
         }
         setCell(id, player1Piece);
@@ -61,6 +56,10 @@
     function choosePiece(piece) {
         player1Piece = piece;
         player2Piece = (piece === CROSS) ? NOUGHT : CROSS;
+    }
+    
+    function whoGoesFirst() {
+        return (Math.random() < 0.5) ? 1 : 2;
     }
     
     function computerMove() {
@@ -109,10 +108,11 @@
                     setMessage(DRAW_MESSAGE);
                     break;
                 default:
-                setMessage(UNKNOWN_WINNER_MESSAGE);
+                    setMessage(UNKNOWN_WINNER_MESSAGE);
                     break;    
             }
             gameOver = true;
+            showStartButton();
         }
         else {
             setMessage(PLAYER1_TURN_MESSAGE);
@@ -144,7 +144,15 @@
         setCell("cell22", s[8]);
     }
     
-    function resetBoard() {
+    function initialise() {
+        reset();
+        showRadioButtons();
+        showStartButton();
+        hideSpinner();
+        setMessage(CHOOSE_PIECE_MESSAGE);
+    }
+    
+    function reset() {
         var emptyBoard = [
             EMPTY, EMPTY, EMPTY,
             EMPTY, EMPTY, EMPTY,
@@ -152,6 +160,22 @@
         ].join("");
         updateBoardFromString(emptyBoard);
         $("#board td").removeClass("highlight");
+        started = false;
+        gameOver = false;
+        computerMoveInProgress = false;
+    }
+    
+    function start() {
+        reset();
+        started = true;
+        hideRadioButtons();
+        showResetButton();
+        if (whoGoesFirst() === 1) {
+            setMessage(PLAYER1_TURN_MESSAGE);
+        }
+        else {
+            computerMove();
+        }
     }
     
     function setCell(id, ch) {
@@ -183,6 +207,16 @@
     
     function setMessage(message) {
         $("#messageArea").html(message);
+    }
+    
+    function showStartButton() {
+        $("#startBtn").show();
+        $("#resetBtn").hide();
+    }
+    
+    function showResetButton() {
+        $("#resetBtn").show();
+        $("#startBtn").hide();
     }
     
     function showSpinner() {
