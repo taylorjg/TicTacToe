@@ -66,6 +66,32 @@ function handleComputerMove(req, res, _) {
 }
 
 function tryToWin(state) {
+    for (var i = 0; i < LINES.length; i++) {
+        var line = LINES[i];
+        var indices1 = [];
+        var indices2 = [];
+        for (var j = 0; j < line.length; j++) {
+            var idx = line[j];
+            var ch = state.board[idx];
+            if (ch === state.player2Piece) {
+                indices1.push(idx);
+            }
+            else {
+                if (ch !== state.player1Piece) {
+                    indices2.push(idx);
+                }
+            }
+        }
+        if (indices1.length === 2 && indices2.length === 1) {
+            return {
+                board: setCharAt(state.board, state.player2Piece, indices2[0]),
+                gameOver: true,
+                winningPlayer: 2,
+                winningLine: line
+            }
+        }
+    }
+
     return null;
 }
 
