@@ -14,7 +14,7 @@ var LINES = [
 ];
 
 exports.computerMove = function(state) {
-    
+
     var winOrDraw = checkForWinOrDraw(state);
     if (winOrDraw) {
         return winOrDraw;
@@ -27,6 +27,11 @@ exports.computerMove = function(state) {
 
     var blockingMove = tryToBlock(state);
     if (blockingMove) {
+        // If the blockingMove is also a draw, the draw is more important.
+        winOrDraw = checkForWinOrDraw(blockingMove);
+        if (winOrDraw) {
+            return winOrDraw;
+        }
         return blockingMove;
     }
 
@@ -37,11 +42,10 @@ exports.computerMove = function(state) {
         return winOrDraw;
     }
     
-    var responseData = {
+    return responseData = {
         board: state.board,
         gameOver: false
     };
-    return responseData;   
 }
 
 function tryToWin(state) {
