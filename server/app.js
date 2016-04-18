@@ -24,7 +24,7 @@ function handleComputerMove(req, res, _) {
     console.log("state", state);
     
     var responseData = engine.computerMove(state);
-    console.log();
+    console.log("responseData", responseData);
     
     return res.json(responseData);
 }

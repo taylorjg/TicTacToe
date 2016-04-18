@@ -30,13 +30,10 @@ exports.computerMove = function(state) {
         return blockingMove;
     }
 
-    console.log("Before makeRandomMove", state.board);
     makeRandomMove(state);
-    console.log("After makeRandomMove", state.board);
     
     winOrDraw = checkForWinOrDraw(state);
     if (winOrDraw) {
-        console.log("winOrDraw", winOrDraw);
         return winOrDraw;
     }
     
@@ -44,7 +41,6 @@ exports.computerMove = function(state) {
         board: state.board,
         gameOver: false
     };
-    console.log("responseData", responseData);
     return responseData;   
 }
 
@@ -173,7 +169,7 @@ function checkForDraw(state) {
         return {
             board: state.board,
             gameOver: true,
-            winningPlayer: 3,
+            winningPlayer: 3
         }
     }
     
