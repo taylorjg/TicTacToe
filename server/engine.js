@@ -14,38 +14,11 @@ var LINES = [
 ];
 
 exports.computerMove = function(state) {
-
-    var winOrDraw = checkForWinOrDraw(state);
-    if (winOrDraw) {
-        return winOrDraw;
-    }
-    
-    var winningMove = tryToWin(state);
-    if (winningMove) {
-        return winningMove;
-    }
-
-    var blockingMove = tryToBlock(state);
-    if (blockingMove) {
-        // If the blockingMove is also a draw, the draw is more important.
-        winOrDraw = checkForWinOrDraw(blockingMove);
-        if (winOrDraw) {
-            return winOrDraw;
-        }
-        return blockingMove;
-    }
-
-    makeRandomMove(state);
-    
-    winOrDraw = checkForWinOrDraw(state);
-    if (winOrDraw) {
-        return winOrDraw;
-    }
-    
-    return responseData = {
-        board: state.board,
-        gameOver: false
-    };
+    return null ||
+        checkForWinOrDraw(state) ||
+        tryToWin(state) ||
+        tryToBlock(state) ||
+        makeRandomMove(state);    
 }
 
 function tryToWin(state) {
@@ -60,6 +33,11 @@ function tryToWin(state) {
 }
 
 function tryToBlock(state) {
+    
+    if (getUnoccupiedIndices(state).length === 1) {
+        return null;
+    }
+    
     return checkForLineWithTwoPiecesAndOneEmpty(state, state.player1Piece, function(newBoard, line) {
         return {
             board: newBoard,
@@ -68,24 +46,24 @@ function tryToBlock(state) {
     });
 }
 
-function checkForLineWithTwoPiecesAndOneEmpty(state, piece, buildResponse) {
+function checkForLineWithTwoPiecesAndOneEmpty(state, givenPiece, buildResponse) {
     
-    for (var i = 0; i < LINES.length; i++) {
-        var line = LINES[i];
-        var cellsWithPiece = [];
-        var emptyCells = [];
-        for (var j = 0; j < line.length; j++) {
-            var cellIndex = line[j];
-            var ch = state.board[cellIndex];
-            if (ch === piece) {
-                cellsWithPiece.push(cellIndex);
+    for (var linesIndex = 0; linesIndex < LINES.length; linesIndex++) {
+        var line = LINES[linesIndex];
+        var indicesWithGivenPiece = [];
+        var indicesOfEmptyCells = [];
+        for (var lineIndex = 0; lineIndex < line.length; lineIndex++) {
+            var boardIndex = line[lineIndex];
+            var piece = state.board[boardIndex];
+            if (piece === givenPiece) {
+                indicesWithGivenPiece.push(boardIndex);
             }
-            if (ch !== state.player1Piece && ch !== state.player2Piece) {
-                emptyCells.push(cellIndex);
+            if (piece !== state.player1Piece && piece !== state.player2Piece) {
+                indicesOfEmptyCells.push(boardIndex);
             }
         }
-        if (cellsWithPiece.length === 2 && emptyCells.length === 1) {
-            var newBoard = setCharAt(state.board, state.player2Piece, emptyCells[0]);
+        if (indicesWithGivenPiece.length === 2 && indicesOfEmptyCells.length === 1) {
+            var newBoard = setCharAt(state.board, state.player2Piece, indicesOfEmptyCells[0]);
             return buildResponse(newBoard, line);
         }
     }
@@ -94,28 +72,14 @@ function checkForLineWithTwoPiecesAndOneEmpty(state, piece, buildResponse) {
 }
 
 function makeRandomMove(state) {
-    var unoccupiedIndices = [];
-    for (var i = 0; i < state.board.length; i++) {
-        var ch = state.board[i];
-        if (ch !== CROSS && ch !== NOUGHT) {
-            unoccupiedIndices.push(i);
-        }
-    }
+    var unoccupiedIndices = getUnoccupiedIndices(state);
     var r = getRandomIntInclusive(0, unoccupiedIndices.length - 1);
     state.board = setCharAt(state.board, state.player2Piece, unoccupiedIndices[r]);
-}
-
-function setCharAt(s, ch, index) {
-    var chs = [];
-    for (var i = 0; i < s.length; i++) {
-        chs.push(s[i]);
-    }
-    chs[index] = ch;
-    return chs.join("");
-}
-
-function getRandomIntInclusive(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    var winOrDraw = checkForWinOrDraw(state);
+    return winOrDraw || {
+        board: state.board,
+        gameOver: false
+    };
 }
 
 function checkForWinOrDraw(state) {
@@ -138,23 +102,18 @@ function checkForWinOrDraw(state) {
 
 function checkForWinningLine(state, line) {
     
-    var chs = "";
+    var pieces = "";
     
     for (var i = 0; i < line.length; i++) {
         var boardIndex = line[i];
-        chs += state.board[boardIndex];
+        var piece = state.board[boardIndex];
+        pieces += piece;
     }
     
-    if (chs === THREE_CROSSES || chs == THREE_NOUGHTS) {
-        return playerNumberFromPiece(state, chs[0]);
+    if (pieces === THREE_CROSSES || pieces == THREE_NOUGHTS) {
+        return playerNumberFromPiece(state, pieces[0]);
     }
     
-    return null;
-}
-
-function playerNumberFromPiece(state, ch) {
-    if (ch === state.player1Piece) return 1;
-    if (ch === state.player2Piece) return 2;
     return null;
 }
 
@@ -162,9 +121,9 @@ function checkForDraw(state) {
     
     var occupiedCellCount = 0;
     
-    for (var i = 0; i < state.board.length; i++) {
-        var ch = state.board[i];
-        if (ch === CROSS || ch === NOUGHT) {
+    for (var boardIndex = 0; boardIndex < state.board.length; boardIndex++) {
+        var piece = state.board[boardIndex];
+        if (piece === CROSS || piece === NOUGHT) {
             occupiedCellCount++;
         }
     }
@@ -178,4 +137,34 @@ function checkForDraw(state) {
     }
     
     return null;
+}
+
+function getUnoccupiedIndices(state) {
+    var unoccupiedIndices = [];
+    for (var boardIndex = 0; boardIndex < state.board.length; boardIndex++) {
+        var piece = state.board[boardIndex];
+        if (piece !== CROSS && piece !== NOUGHT) {
+            unoccupiedIndices.push(boardIndex);
+        }
+    }
+    return unoccupiedIndices;
+}
+
+function playerNumberFromPiece(state, piece) {
+    if (piece === state.player1Piece) return 1;
+    if (piece === state.player2Piece) return 2;
+    return null;
+}
+
+function setCharAt(s, ch, index) {
+    var chs = [];
+    for (var i = 0; i < s.length; i++) {
+        chs.push(s[i]);
+    }
+    chs[index] = ch;
+    return chs.join("");
+}
+
+function getRandomIntInclusive(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
