@@ -1,0 +1,23 @@
+{
+  "name": "TicTacToe",
+  "version": "0.0.0",
+  "description": "TicTacToe",
+  "main": "server/app.js",
+  "dependencies": {
+    "express": "^4.13.4",
+    "body-parser": "^1.15.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  },
+  "scripts": {
+    "start": "node server/app.js",
+    "test": "mocha server/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taylorjg/TicTacToe.git"
+  },
+  "author": "Jonathan Taylor",
+  "homepage": "https://github.com/taylorjg/TicTacToe"
+}
