@@ -2,7 +2,8 @@
     
     "use strict";
 
-    var CHOOSE_PIECE_MESSAGE = "Choose noughts or crosses then click the Start button.";     
+    var CHOOSE_PIECE_MESSAGE = "Choose noughts or crosses then click the Start button.";
+    var START_MESSAGE = "Click the Start button to start a new game.";     
     var PLAYER1_TURN_MESSAGE = "Your turn. Click an empty square to make your move.";
     var PLAYER2_TURN_MESSAGE = "The computer is thinking...";
     var PLAYER1_WON_MESSAGE = "You won!";
@@ -37,7 +38,7 @@
     }
 
     function onReset() {
-        start();
+        reinitialise();
     }
 
     function onCellClick(e) {
@@ -146,29 +147,34 @@
     
     function initialise() {
         reset();
-        showRadioButtons();
+        showChoosePieceRadioButtons();
         showStartButton();
-        hideSpinner();
-        setMessage(CHOOSE_PIECE_MESSAGE);
+    }
+    
+    function reinitialise() {
+        reset();
+        showStartButton();
+        setMessage(START_MESSAGE);
     }
     
     function reset() {
-        var emptyBoard = [
+        var emptyBoardString = [
             EMPTY, EMPTY, EMPTY,
             EMPTY, EMPTY, EMPTY,
             EMPTY, EMPTY, EMPTY
         ].join("");
-        updateBoardFromString(emptyBoard);
+        updateBoardFromString(emptyBoardString);
         $("#board td").removeClass("highlight");
         started = false;
         gameOver = false;
         computerMoveInProgress = false;
+        hideSpinner();
     }
     
     function start() {
         reset();
         started = true;
-        hideRadioButtons();
+        hideChoosePieceRadioButtons();
         showResetButton();
         if (whoGoesFirst() === 1) {
             setMessage(PLAYER1_TURN_MESSAGE);
@@ -227,11 +233,12 @@
         $("#spinner").hide();
     }
     
-    function showRadioButtons() {
+    function showChoosePieceRadioButtons() {
         $("#radioButtons").show();
+        setMessage(CHOOSE_PIECE_MESSAGE);
     }
     
-    function hideRadioButtons() {
+    function hideChoosePieceRadioButtons() {
         $("#radioButtons").hide();
     }
 }());
