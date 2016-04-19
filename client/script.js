@@ -185,13 +185,13 @@
         }
     }
     
-    function setCell(id, ch) {
-        $("#" + id).html(ch === CROSS || ch === NOUGHT ? ch : "");
+    function setCell(id, piece) {
+        $("#" + id).html(piece === CROSS || piece === NOUGHT ? piece : "");
     }
     
     function getCell(id) {
-        var ch = $("#" + id).html();
-        return ch === CROSS || ch === NOUGHT ? ch : EMPTY;
+        var piece = $("#" + id).html();
+        return piece === CROSS || piece === NOUGHT ? piece : EMPTY;
     }
     
     function highlightWinningLine(cellIndices) {
