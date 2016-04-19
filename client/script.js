@@ -10,6 +10,7 @@
     var PLAYER2_WON_MESSAGE = "The computer won!";
     var DRAW_MESSAGE = "It's a draw!";
     var UNKNOWN_WINNER_MESSAGE = "I r confuse about who won!?";
+    var ARTIFICIAL_THINKING_TIME = 750;
     var CROSS = "X";
     var NOUGHT = "O";
     var EMPTY = "-";
@@ -51,7 +52,7 @@
             return;
         }
         setCell(id, player1Piece);
-        computerMove();
+        makeComputerMove();
     }
     
     function choosePiece(piece) {
@@ -63,47 +64,47 @@
         return (Math.random() < 0.5) ? 1 : 2;
     }
     
-    function computerMove() {
+    function makeComputerMove() {
         
-        computerMoveInProgress = true;
-        
-        setMessage(PLAYER2_TURN_MESSAGE);
         showSpinner();
+        computerMoveInProgress = true;
+        setMessage(PLAYER2_TURN_MESSAGE);
         
-        var requestData = {
-            board: saveBoardToString(),
-            player1Piece: player1Piece,
-            player2Piece: player2Piece
-        };
+        setTimeout(function() {
+            
+            var requestData = {
+                board: saveBoardToString(),
+                player1Piece: player1Piece,
+                player2Piece: player2Piece
+            };
         
-        $.post({
-            url: "/api/computerMove",
-            data: JSON.stringify(requestData),
-            contentType: "application/json"
-        })
-            .done(function(responseData) {
-                handleComputerMove(responseData);
+            $.post({
+                url: "/api/computerMove",
+                data: JSON.stringify(requestData),
+                contentType: "application/json"
             })
-            .fail(function(xhr, statusText, error) {
-                console.log(arguments);
-            })
-            .always(function() {
-                hideSpinner();
-                computerMoveInProgress = false;
-            });        
+                .done(handleComputerMove)
+                .fail(function(xhr, statusText, error) {
+                    console.log(arguments);
+                })
+                .always(function() {
+                    hideSpinner();
+                    computerMoveInProgress = false;
+                });        
+        }, ARTIFICIAL_THINKING_TIME);
     }
     
-    function handleComputerMove(responseData) {
-        updateBoardFromString(responseData.board);
-        if (responseData.gameOver) {
-            switch (responseData.winningPlayer) {
+    function handleComputerMove(state) {
+        updateBoardFromString(state.board);
+        if (state.gameOver) {
+            switch (state.winningPlayer) {
                 case 1:
                     setMessage(PLAYER1_WON_MESSAGE);
-                    highlightWinningLine(responseData.winningLine);
+                    highlightWinningLine(state.winningLine);
                     break;
                 case 2:
                     setMessage(PLAYER2_WON_MESSAGE);
-                    highlightWinningLine(responseData.winningLine);
+                    highlightWinningLine(state.winningLine);
                     break;
                 case 3:
                     setMessage(DRAW_MESSAGE);
@@ -180,7 +181,7 @@
             setMessage(PLAYER1_TURN_MESSAGE);
         }
         else {
-            computerMove();
+            makeComputerMove();
         }
     }
     
